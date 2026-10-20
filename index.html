@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小学生向け まちがいなおしドリル</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Zen Maru Gothic) for friendly rounded text -->
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Zen Maru Gothic"', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF6B6B',
+                        secondary: '#4ECDC4',
+                        accent: '#FFE66D',
+                        math: '#3B82F6',
+                        japanese: '#EF4444',
+                        science: '#10B981',
+                        social: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background-color: #F7F9FC;
+        }
+        /* Custom styles for quiz choice selection animation */
+        .choice-btn {
+            transition: all 0.2s ease;
+        }
+        .choice-btn:hover {
+            transform: translateY(-2px);
+        }
+        .choice-btn.selected {
+            border-color: #4ECDC4;
+            background-color: #E6FFFA;
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+        }
+        /* Confetti effect */
+        .badge-pop {
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-3 sm:p-6">
+
+    <!-- Header / Navbar -->
+    <header class="max-w-4xl mx-auto w-full bg-white rounded-3xl p-4 sm:p-6 shadow-sm border-2 border-slate-100 mb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center space-x-3">
+            <span class="text-3xl sm:text-4xl">✏️</span>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-black text-slate-800 tracking-wide">まちがいなおしドリル</h1>
+                <p class="text-xs sm:text-sm font-bold text-slate-400">なんどもちょうせんして、にがてをこくふくしよう！</p>
+            </div>
+        </div>
+
+        <!-- Subject Filter Buttons -->
+        <div class="flex flex-wrap gap-1.5 sm:gap-2 justify-center" id="subject-filters">
+            <button onclick="setSubject('all')" id="filter-all" class="filter-btn active bg-slate-800 text-white px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-bold transition hover:opacity-90 shadow-sm">すべて</button>
+            <button onclick="setSubject('算数')" id="filter-math" class="filter-btn bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-bold transition">算数</button>
+            <button onclick="setSubject('国語')" id="filter-japanese" class="filter-btn bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-bold transition">国語</button>
+            <button onclick="setSubject('理科')" id="filter-science" class="filter-btn bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-bold transition">理科</button>
+            <button onclick="setSubject('社会')" id="filter-social" class="filter-btn bg-amber-100 text-amber-700 hover:bg-amber-200 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-bold transition">社会</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto w-full flex-grow flex flex-col">
+
+        <!-- QUIZ SCREEN -->
+        <div id="quiz-screen" class="bg-white rounded-3xl p-4 sm:p-8 shadow-sm border-2 border-slate-100 flex-grow flex flex-col justify-between">
+            <div>
+                <!-- Top Info Bar: Question Number & Subject Badge -->
+                <div class="flex justify-between items-center mb-4 sm:mb-6 pb-3 border-b-2 border-slate-100">
+                    <div class="flex items-center space-x-2">
+                        <span id="subject-badge" class="px-3 py-1 rounded-full text-xs sm:text-sm font-bold text-white bg-blue-500">算数</span>
+                        <span id="progress-text" class="text-sm sm:text-base font-extrabold text-slate-500">だい 1 / 10 もん</span>
+                    </div>
+                    <!-- Answered indicator badges -->
+                    <div id="status-dots" class="hidden md:flex space-x-1.5">
+                        <!-- Dynamic JS generation -->
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 rounded-full h-2.5 mb-6 overflow-hidden">
+                    <div id="progress-bar" class="bg-teal-400 h-2.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+                </div>
+
+                <!-- Question Text -->
+                <div class="mb-6 sm:mb-8 min-h-[80px]">
+                    <h2 id="question-text" class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed">
+                        問題文がここに読み込まれます...
+                    </h2>
+                </div>
+
+                <!-- 4 Choices -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6" id="choices-container">
+                    <!-- Dynamic JS Choice Buttons -->
+                </div>
+            </div>
+
+            <!-- Bottom Navigation Bar -->
+            <div class="flex justify-between items-center pt-4 border-t-2 border-slate-100 gap-2">
+                <button id="prev-btn" onclick="prevQuestion()" class="flex items-center space-x-1 sm:space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl text-sm sm:text-base transition disabled:opacity-40 disabled:cursor-not-allowed">
+                    <span>⬅️</span>
+                    <span>まえへ</span>
+                </button>
+
+                <div class="text-xs sm:text-sm font-bold text-slate-400 text-center hidden sm:block" id="unanswered-warning">
+                    すべての問題にこたえてね！
+                </div>
+
+                <button id="next-btn" onclick="nextQuestion()" class="flex items-center space-x-1 sm:space-x-2 bg-teal-400 hover:bg-teal-500 text-white font-bold px-5 sm:px-7 py-2.5 sm:py-3 rounded-2xl text-sm sm:text-base transition shadow-md hover:shadow-lg">
+                    <span>つぎへ</span>
+                    <span>➡️</span>
+                </button>
+
+                <button id="commit-btn" onclick="scoreQuiz()" class="hidden flex items-center space-x-2 bg-rose-500 hover:bg-rose-600 text-white font-extrabold px-6 sm:px-8 py-2.5 sm:py-3 rounded-2xl text-sm sm:text-base transition shadow-md hover:shadow-lg badge-pop">
+                    <span>✏️ さいてんする！</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- RESULT SCREEN (Initially Hidden) -->
+        <div id="result-screen" class="hidden bg-white rounded-3xl p-4 sm:p-8 shadow-sm border-2 border-slate-100 flex-grow">
+            <!-- Result Summary Header -->
+            <div class="text-center py-6 border-b-2 border-slate-100">
+                <div id="result-emoji" class="text-6xl mb-2">🎉</div>
+                <h2 id="result-title" class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">けっか はっぴょう！</h2>
+                <div class="text-slate-600 font-bold text-lg mb-4">
+                    10もんちゅう <span id="score-text" class="text-4xl font-black text-rose-500">8</span> もん せいかい！
+                </div>
+                <div id="score-comment" class="bg-amber-50 border-2 border-amber-200 text-amber-800 p-4 rounded-2xl max-w-md mx-auto text-sm sm:text-base font-bold">
+                    素晴らしい！この調子で学習を続けましょう！
+                </div>
+            </div>
+
+            <!-- Review / Detail List -->
+            <div class="my-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <span>🔍</span> こたえあわせ・かいせつ
+                </h3>
+                <div id="review-list" class="space-y-4">
+                    <!-- Dynamic Answer Details -->
+                </div>
+            </div>
+
+            <!-- Retry Button -->
+            <div class="text-center pt-4 border-t-2 border-slate-100">
+                <button onclick="initQuiz()" class="bg-teal-400 hover:bg-teal-500 text-white font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 inline-flex items-center gap-2">
+                    <span>🔄</span> もういちど ちょうせんする！
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-6 text-center text-xs font-bold text-slate-400">
+        小学生向け まちがいなおしドリル &copy; 2026
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Sample Question Database (Embedded JSON)
+        const quizDatabase = [
+            // 算数
+            { id: 1, subject: "算数", question: "8 × 7 は いくつですか？", choices: ["ア: 54", "イ: 56", "ウ: 63", "エ: 48"], answer: "イ", explanation: "8の段の九九です。8 × 7 = 56 です。" },
+            { id: 2, subject: "算数", question: "1時間は 何分ですか？", choices: ["ア: 30分", "イ: 100分", "ウ: 60分", "エ: 24分"], answer: "ウ", explanation: "1時間は60分、1分は60秒です。" },
+            { id: 3, subject: "算数", question: "120 - 45 は いくつですか？", choices: ["ア: 75", "イ: 85", "ウ: 65", "エ: 70"], answer: "ア", explanation: "くり下がりに注意して計算します。120 - 45 = 75 です。" },
+            { id: 4, subject: "算数", question: "三角形の 3つの角の 合計（和）は 何度ですか？", choices: ["ア: 90度", "イ: 360度", "ウ: 180度", "エ: 270度"], answer: "ウ", explanation: "どんな三角形でも、3つの角の角度を足すと180度になります。" },
+            { id: 5, subject: "算数", question: "1L（リットル）は 何mL（ミリリットル）ですか？", choices: ["ア: 100mL", "イ: 1000mL", "ウ: 10mL", "エ: 10000mL"], answer: "イ", explanation: "「m（ミリ）」は1000分の1を表す単位なので、1L = 1000mLです。" },
+
+            // 国語
+            { id: 6, subject: "国語", question: "「川」の 音読みは どれですか？", choices: ["ア: かわ", "イ: セン", "ウ: スイ", "エ: サン"], answer: "イ", explanation: "「川」の訓読みは「かわ」、音読みは「セン（河川など）」です。" },
+            { id: 7, subject: "国語", question: "「犬も歩けば○○にあたる」の ○○に入る言葉はどれ？", choices: ["ア: かべ", "イ: ぼう", "ウ: 石", "エ: 木"], answer: "イ", explanation: "ことわざ「犬も歩けば棒にあたる」です。" },
+            { id: 8, subject: "国語", question: "次のうち、「反対の意味の言葉」の組はどれですか？", choices: ["ア: 大きい - 広い", "イ: 高い - 低い", "ウ: 楽しい - 面白い", "エ: 早い - 速い"], answer: "イ", explanation: "「高い」と「低い」は反対の意味を持つ対義語（たいぎご）です。" },
+            { id: 9, subject: "国語", question: "「私○○ 学校へ 行きます」の ○○に入る正しい助詞はどれ？", choices: ["ア: は", "イ: を", "ウ: が", "エ: に"], answer: "ア", explanation: "主語を表す「〜は（わ）」が入ります。" },
+            { id: 10, subject: "国語", question: "「一生懸命（いっしょうけんめい）」と同じ意味の四字熟語はどれ？", choices: ["ア: 一石二鳥", "イ: 一所懸命", "ウ: 十人十色", "エ: 三日坊主"], answer: "イ", explanation: "もともとは武士が「一つの領地（所）を命がけで守る」ことから「一所懸命」と書かれていました。" },
+
+            // 理科
+            { id: 11, subject: "理科", question: "昆虫（こんちゅう）の 体の足は 全部で何本ですか？", choices: ["ア: 4本", "イ: 6本", "ウ: 8本", "エ: 10本"], answer: "イ", explanation: "昆虫の体は頭・胸・腹の3つに分かれており、胸から6本の足が生えています。" },
+            { id: 12, subject: "理科", question: "水が 沸騰（ふっとう）して 気体になったものを 何といいますか？", choices: ["ア: 水滴", "イ: 氷", "ウ: 水蒸気", "エ: 湯"], answer: "ウ", explanation: "水が気体になったものを「水蒸気（すいじょうき）」と呼びます。" },
+            { id: 13, subject: "理科", question: "太陽（たいよう）は どの 方角から のぼりますか？", choices: ["ア: 東", "イ: 西", "ウ: 南", "エ: 北"], answer: "ア", explanation: "太陽や月、星はすべて「東」から昇り、「西」へ沈みます。" },
+            { id: 14, subject: "理科", question: "植物が 光をあびて 酸素とでんぷんをつくるはたらきを 何といいますか？", choices: ["ア: 呼吸", "イ: 光合成", "ウ: 蒸散", "エ: 発芽"], answer: "イ", explanation: "葉にある葉緑体で光のエネルギーを使って養分を作るはたらきを「光合成（こうごうせい）」といいます。" },
+            { id: 15, subject: "理科", question: "磁石（じしゃく）の N極どうしを 近づけると どうなりますか？", choices: ["ア: くっつく", "イ: しりぞけあう（離れる）", "ウ: 何も起きない", "エ: 熱くなる"], answer: "イ", explanation: "磁石は同じ極どうし（NとN、SとS）は退け合い、違う極どうし（NとS）は引き合います。" },
+
+            // 社会
+            { id: 16, subject: "社会", question: "日本で 一番高い 山は どれですか？", choices: ["ア: 富士山", "イ: 阿蘇山", "ウ: 筑波山", "エ: 北岳"], answer: "ア", explanation: "日本で一番高い山は標高3,776mの「富士山（ふじさん）」です。" },
+            { id: 17, subject: "社会", question: "日本の 都道府県は 全部で いくつありますか？", choices: ["ア: 43", "イ: 47", "ウ: 50", "エ: 38"], answer: "イ", explanation: "1都1道2府43県で、全部で47の都道府県があります。" },
+            { id: 18, subject: "社会", question: "地図で「北」は 通常（つねに）どちらの 方角ですか？", choices: ["ア: 右", "イ: 左", "ウ: 上", "エ: 下"], answer: "ウ", explanation: "特に記載がない限り、地図は「上」が北を表します。" },
+            { id: 19, subject: "社会", question: "ごみを 分別して 再び 資源として 使うことを 何といいますか？", choices: ["ア: リユース", "イ: リサイクル", "ウ: リデュース", "エ: リフォーム"], answer: "イ", explanation: "ごみを処理して新しい製品の材料にする工程を「リサイクル（再資源化）」といいます。" },
+            { id: 20, subject: "社会", question: "日本の 首都（しゅと）は どこですか？", choices: ["ア: 大阪府", "イ: 京都府", "ウ: 東京都", "エ: 愛知県"], answer: "ウ", explanation: "日本の首都機能が集まっているのは「東京都」です。" }
+        ];
+
+        // Global State Variables
+        let currentSubject = 'all';
+        let activeQuestions = [];
+        let userAnswers = {}; // Map of question index -> selected choice code ('ア','イ','ウ','エ')
+        let currentIndex = 0;
+
+        // Choice labels mapped to option index
+        const choiceLabels = ['ア', 'イ', 'ウ', 'エ'];
+
+        // Init App on Page Load
+        window.onload = () => {
+            initQuiz();
+        };
+
+        // Filter subject
+        function setSubject(subject) {
+            currentSubject = subject;
+            
+            // Update filter button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'text-white', 'shadow-sm');
+                btn.classList.add('opacity-80');
+            });
+
+            // Highlight selected button
+            const filterMap = {
+                'all': 'filter-all',
+                '算数': 'filter-math',
+                '国語': 'filter-japanese',
+                '理科': 'filter-science',
+                '社会': 'filter-social'
+            };
+            const activeBtn = document.getElementById(filterMap[subject]);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-slate-800', 'text-white', 'shadow-sm');
+                activeBtn.classList.remove('opacity-80');
+            }
+
+            initQuiz();
+        }
+
+        // Initialize / Reset Quiz
+        function initQuiz() {
+            // Filter pool
+            let pool = quizDatabase;
+            if (currentSubject !== 'all') {
+                pool = quizDatabase.filter(q => q.subject === currentSubject);
+            }
+
+            // Shuffle and pick up to 10
+            const shuffled = [...pool].sort(() => 0.5 - Math.random());
+            activeQuestions = shuffled.slice(0, 10);
+
+            // Reset state
+            userAnswers = {};
+            currentIndex = 0;
+
+            // UI view toggle
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+
+            // Render status dots
+            renderStatusDots();
+
+            // Load first question
+            loadQuestion(currentIndex);
+        }
+
+        // Render progress status indicator dots
+        function renderStatusDots() {
+            const container = document.getElementById('status-dots');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < activeQuestions.length; i++) {
+                const dot = document.createElement('div');
+                dot.id = `status-dot-${i}`;
+                dot.className = `w-3 h-3 rounded-full transition-all border ${
+                    i === currentIndex ? 'border-slate-800 scale-125' : 'border-slate-200'
+                } ${userAnswers[i] ? 'bg-teal-400' : 'bg-slate-200'}`;
+                container.appendChild(dot);
+            }
+        }
+
+        // Display current question details
+        function loadQuestion(index) {
+            if (activeQuestions.length === 0) {
+                document.getElementById('question-text').innerText = "該当する問題がありません。";
+                document.getElementById('choices-container').innerHTML = '';
+                return;
+            }
+
+            const q = activeQuestions[index];
+
+            // Progress Texts
+            document.getElementById('progress-text').innerText = `だい ${index + 1} / ${activeQuestions.length} もん`;
+            
+            // Progress Bar Width
+            const progressPercent = ((index + 1) / activeQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Subject Badge Style
+            const badge = document.getElementById('subject-badge');
+            badge.innerText = q.subject;
+            badge.className = "px-3 py-1 rounded-full text-xs sm:text-sm font-bold text-white shadow-sm ";
+            switch(q.subject) {
+                case '算数': badge.classList.add('bg-blue-500'); break;
+                case '国語': badge.classList.add('bg-red-500'); break;
+                case '理科': badge.classList.add('bg-emerald-500'); break;
+                case '社会': badge.classList.add('bg-amber-500'); break;
+                default: badge.classList.add('bg-slate-500'); break;
+            }
+
+            // Question Text
+            document.getElementById('question-text').innerText = q.question;
+
+            // Choices Buttons
+            const choicesContainer = document.getElementById('choices-container');
+            choicesContainer.innerHTML = '';
+
+            q.choices.forEach((choice, choiceIdx) => {
+                const choiceCode = choiceLabels[choiceIdx];
+                const isSelected = userAnswers[index] === choiceCode;
+
+                const btn = document.createElement('button');
+                btn.className = `choice-btn p-4 sm:p-5 rounded-2xl border-2 text-left font-bold text-base sm:text-lg flex items-center justify-between w-full transition ${
+                    isSelected 
+                        ? 'selected border-teal-400 bg-teal-50 text-teal-800' 
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                }`;
+
+                btn.onclick = () => selectAnswer(index, choiceCode);
+
+                btn.innerHTML = `
+                    <span>${choice}</span>
+                    <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs ${
+                        isSelected ? 'border-teal-500 bg-teal-500 text-white' : 'border-slate-300 text-transparent'
+                    }">✓</span>
+                `;
+
+                choicesContainer.appendChild(btn);
+            });
+
+            // Navigation Buttons State Update
+            document.getElementById('prev-btn').disabled = (index === 0);
+
+            // Update status dots active indicator
+            for (let i = 0; i < activeQuestions.length; i++) {
+                const dot = document.getElementById(`status-dot-${i}`);
+                if (dot) {
+                    dot.className = `w-3 h-3 rounded-full transition-all border ${
+                        i === index ? 'border-slate-800 scale-125' : 'border-slate-200'
+                    } ${userAnswers[i] ? 'bg-teal-400' : 'bg-slate-200'}`;
+                }
+            }
+
+            checkCompletion();
+        }
+
+        // Handle user selecting an answer option
+        function selectAnswer(questionIndex, choiceCode) {
+            userAnswers[questionIndex] = choiceCode;
+            loadQuestion(questionIndex);
+        }
+
+        // Navigate to previous question
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                loadQuestion(currentIndex);
+            }
+        }
+
+        // Navigate to next question
+        function nextQuestion() {
+            if (currentIndex < activeQuestions.length - 1) {
+                currentIndex++;
+                loadQuestion(currentIndex);
+            }
+        }
+
+        // Check if all questions are answered & show commit button
+        function checkCompletion() {
+            const totalCount = activeQuestions.length;
+            const answeredCount = Object.keys(userAnswers).length;
+
+            const nextBtn = document.getElementById('next-btn');
+            const commitBtn = document.getElementById('commit-btn');
+            const warningText = document.getElementById('unanswered-warning');
+
+            if (answeredCount === totalCount && totalCount > 0) {
+                // All answered
+                if (currentIndex === totalCount - 1) {
+                    nextBtn.classList.add('hidden');
+                    commitBtn.classList.remove('hidden');
+                } else {
+                    nextBtn.classList.remove('hidden');
+                    commitBtn.classList.add('hidden');
+                }
+                warningText.innerText = "すべての問題にこたえ終わりました！";
+                warningText.className = "text-xs sm:text-sm font-bold text-teal-600 text-center hidden sm:block";
+            } else {
+                nextBtn.classList.remove('hidden');
+                commitBtn.classList.add('hidden');
+                warningText.innerText = `のこり ${totalCount - answeredCount} もん 未回答です`;
+                warningText.className = "text-xs sm:text-sm font-bold text-amber-600 text-center hidden sm:block";
+            }
+        }
+
+        // Score Quiz and Render Results Page
+        function scoreQuiz() {
+            let correctCount = 0;
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+
+            activeQuestions.forEach((q, idx) => {
+                const userChoice = userAnswers[idx];
+                const isCorrect = (userChoice === q.answer);
+                if (isCorrect) correctCount++;
+
+                // Build detail item HTML
+                const item = document.createElement('div');
+                item.className = `p-4 sm:p-5 rounded-2xl border-2 ${
+                    isCorrect ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'
+                }`;
+
+                item.innerHTML = `
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs sm:text-sm font-bold px-2.5 py-0.5 rounded-full text-white ${
+                                q.subject === '算数' ? 'bg-blue-500' :
+                                q.subject === '国語' ? 'bg-red-500' :
+                                q.subject === '理科' ? 'bg-emerald-500' : 'bg-amber-500'
+                            }">${q.subject}</span>
+                            <span class="font-black text-slate-700 text-sm sm:text-base">問 ${idx + 1}</span>
+                        </div>
+                        <span class="text-xl sm:text-2xl font-black ${isCorrect ? 'text-emerald-500' : 'text-rose-500'}">
+                            ${isCorrect ? '⭕ 正解' : '❌ 不正解'}
+                        </span>
+                    </div>
+
+                    <p class="font-bold text-slate-800 text-sm sm:text-base mb-3">${q.question}</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-3">
+                        <div class="p-2 rounded-xl bg-white border ${isCorrect ? 'border-emerald-300 text-emerald-800' : 'border-rose-300 text-rose-800'} font-bold">
+                            あなたの回答: ${userChoice ? `${userChoice}` : '未選択'}
+                        </div>
+                        <div class="p-2 rounded-xl bg-white border border-slate-200 font-bold text-slate-700">
+                            正解: <span class="text-emerald-600 font-black">${q.answer}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                        <span class="font-bold text-slate-800">💡 解説: </span>${q.explanation}
+                    </div>
+                `;
+
+                reviewList.appendChild(item);
+            });
+
+            // Score Summary text & messages
+            document.getElementById('score-text').innerText = correctCount;
+
+            const emojiEl = document.getElementById('result-emoji');
+            const commentEl = document.getElementById('score-comment');
+
+            if (correctCount === activeQuestions.length) {
+                emojiEl.innerText = "💮";
+                commentEl.innerText = "パーフェクト！素晴らしい全問正解です！この調子でどんどん進めよう！";
+            } else if (correctCount >= activeQuestions.length * 0.7) {
+                emojiEl.innerText = "🎉";
+                commentEl.innerText = "お見事！よく頑張りました！間違えた問題の解説もチェックして復習しよう！";
+            } else {
+                emojiEl.innerText = "🌱";
+                commentEl.innerText = "おつかれさま！間違えたところを「解説」で復習して、もう一度挑戦してみよう！";
+            }
+
+            // Switch Screen
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
