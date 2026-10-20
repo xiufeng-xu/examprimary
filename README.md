@@ -13,7 +13,7 @@
 
 ### 1. 単独ファイル `questions.js`
 
-以下の内容で `questions.js` というファイルを作成・
+以下の内容で `questions.js` というファイルを作成する。
 
 ```javascript
 // 単独の問題集データベース（questions.js）
@@ -52,64 +52,6 @@ window.quizDatabase = [
 
 `questions.js` を外部スクリプトとして読み込むように更新した `index.html` です。
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小学生向け まちがいなおしドリル</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts (Zen Maru Gothic) for friendly rounded text -->
-    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Zen Maru Gothic"', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#FF6B6B',
-                        secondary: '#4ECDC4',
-                        accent: '#FFE66D',
-                        math: '#3B82F6',
-                        japanese: '#EF4444',
-                        science: '#10B981',
-                        social: '#F59E0B'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            font-family: 'Zen Maru Gothic', sans-serif;
-            background-color: #F7F9FC;
-        }
-        .choice-btn {
-            transition: all 0.2s ease;
-        }
-        .choice-btn:hover {
-            transform: translateY(-2px);
-        }
-        .choice-btn.selected {
-            border-color: #4ECDC4;
-            background-color: #E6FFFA;
-            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
-        }
-        .badge-pop {
-            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes pop {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-    </style>
-    <!-- 単独の問題集jsファイルを読み込み -->
-    <script src="questions.js"></script>
-</head>
-<body class="min-h-screen text-slate-800 flex flex-col justify-between p-3 sm:p-6">
 
 ```html
 <!DOCTYPE html>
