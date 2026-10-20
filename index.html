@@ -6,7 +6,7 @@
     <title>小学生向け まちがいなおしドリル</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts (Zen Maru Gothic) for friendly rounded text -->
+    <!-- Google Fonts (Zen Maru Gothic) -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -18,11 +18,7 @@
                     colors: {
                         primary: '#FF6B6B',
                         secondary: '#4ECDC4',
-                        accent: '#FFE66D',
-                        math: '#3B82F6',
-                        japanese: '#EF4444',
-                        science: '#10B981',
-                        social: '#F59E0B'
+                        accent: '#FFE66D'
                     }
                 }
             }
@@ -52,7 +48,7 @@
             100% { transform: scale(1); opacity: 1; }
         }
     </style>
-    <!-- 単独の問題集jsファイルを読み込み -->
+    <!-- 問題集JavaScript -->
     <script src="questions.js"></script>
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col justify-between p-3 sm:p-6">
@@ -80,18 +76,30 @@
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto w-full flex-grow flex flex-col">
 
-        <!-- QUIZ SCREEN -->
-        <div id="quiz-screen" class="bg-white rounded-3xl p-4 sm:p-8 shadow-sm border-2 border-slate-100 flex-grow flex flex-col justify-between">
+        <!-- START SCREEN (スタート画面) -->
+        <div id="start-screen" class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border-2 border-slate-100 flex-grow flex flex-col items-center justify-center text-center">
+            <div class="text-6xl mb-4">⏱️</div>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">準備はいいですか？</h2>
+            <p class="text-slate-500 font-bold mb-8">「スタート」を押すとタイマーが始まって問題が出題されます！</p>
+            <button onclick="startQuiz()" class="bg-teal-400 hover:bg-teal-500 text-white font-black text-xl sm:text-2xl px-10 py-5 rounded-3xl transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 badge-pop">
+                🚀 スタート！
+            </button>
+        </div>
+
+        <!-- QUIZ SCREEN (問題画面) -->
+        <div id="quiz-screen" class="hidden bg-white rounded-3xl p-4 sm:p-8 shadow-sm border-2 border-slate-100 flex-grow flex flex-col justify-between">
             <div>
-                <!-- Top Info Bar: Question Number & Subject Badge -->
+                <!-- Top Info Bar: Question Number, Subject Badge & Timer -->
                 <div class="flex justify-between items-center mb-4 sm:mb-6 pb-3 border-b-2 border-slate-100">
                     <div class="flex items-center space-x-2">
                         <span id="subject-badge" class="px-3 py-1 rounded-full text-xs sm:text-sm font-bold text-white bg-blue-500">算数</span>
                         <span id="progress-text" class="text-sm sm:text-base font-extrabold text-slate-500">だい 1 / 10 もん</span>
                     </div>
-                    <!-- Answered indicator badges -->
-                    <div id="status-dots" class="hidden md:flex space-x-1.5">
-                        <!-- Dynamic JS generation -->
+
+                    <!-- リアルタイムタイマー表示 -->
+                    <div class="flex items-center bg-slate-100 px-3 py-1.5 rounded-2xl font-black text-slate-700 text-sm sm:text-base border border-slate-200">
+                        <span class="mr-1">⏱️</span>
+                        <span id="live-timer">00分00秒</span>
                     </div>
                 </div>
 
@@ -109,7 +117,7 @@
 
                 <!-- 4 Choices -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6" id="choices-container">
-                    <!-- Dynamic JS Choice Buttons -->
+                    <!-- Dynamic Choice Buttons -->
                 </div>
             </div>
 
@@ -135,15 +143,23 @@
             </div>
         </div>
 
-        <!-- RESULT SCREEN (Initially Hidden) -->
+        <!-- RESULT SCREEN (結果画面) -->
         <div id="result-screen" class="hidden bg-white rounded-3xl p-4 sm:p-8 shadow-sm border-2 border-slate-100 flex-grow">
             <!-- Result Summary Header -->
             <div class="text-center py-6 border-b-2 border-slate-100">
                 <div id="result-emoji" class="text-6xl mb-2">🎉</div>
                 <h2 id="result-title" class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">けっか はっぴょう！</h2>
-                <div class="text-slate-600 font-bold text-lg mb-4">
-                    10もんちゅう <span id="score-text" class="text-4xl font-black text-rose-500">8</span> もん せいかい！
+                
+                <!-- 正解数 ＆ かかった時間表示 -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 my-4">
+                    <div class="text-slate-600 font-bold text-lg">
+                        10もんちゅう <span id="score-text" class="text-4xl font-black text-rose-500">8</span> もん せいかい！
+                    </div>
+                    <div class="bg-slate-100 px-4 py-2 rounded-2xl text-slate-700 font-bold text-base sm:text-lg border border-slate-200">
+                        ⏱️ かかったじかん: <span id="final-time-text" class="text-teal-600 font-black">0分0秒</span>
+                    </div>
                 </div>
+
                 <div id="score-comment" class="bg-amber-50 border-2 border-amber-200 text-amber-800 p-4 rounded-2xl max-w-md mx-auto text-sm sm:text-base font-bold">
                     素晴らしい！この調子で学習を続けましょう！
                 </div>
@@ -161,7 +177,7 @@
 
             <!-- Retry Button -->
             <div class="text-center pt-4 border-t-2 border-slate-100">
-                <button onclick="initQuiz()" class="bg-teal-400 hover:bg-teal-500 text-white font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 inline-flex items-center gap-2">
+                <button onclick="resetToStart()" class="bg-teal-400 hover:bg-teal-500 text-white font-black px-8 py-4 rounded-2xl text-base sm:text-lg transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 inline-flex items-center gap-2">
                     <span>🔄</span> もういちど ちょうせんする！
                 </button>
             </div>
@@ -179,32 +195,31 @@
         // Global State Variables
         let currentSubject = 'all';
         let activeQuestions = [];
-        let userAnswers = {}; // Map of question index -> selected choice code ('ア','イ','ウ','エ')
+        let userAnswers = {};
         let currentIndex = 0;
 
-        // Choice labels mapped to option index
+        // タイマー制御用の変数
+        let startTime = 0;
+        let timerInterval = null;
+        let elapsedTimeInSeconds = 0;
+
         const choiceLabels = ['ア', 'イ', 'ウ', 'エ'];
 
-        // Init App on Page Load
         window.onload = () => {
             if (!window.quizDatabase) {
                 alert("questions.js の読み込みに失敗しました。同じフォルダに questions.js があるか確認してください。");
-                return;
             }
-            initQuiz();
         };
 
-        // Filter subject
+        // 科目フィルター設定
         function setSubject(subject) {
             currentSubject = subject;
             
-            // Update filter button styles
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('bg-slate-800', 'text-white', 'shadow-sm');
                 btn.classList.add('opacity-80');
             });
 
-            // Highlight selected button
             const filterMap = {
                 'all': 'filter-all',
                 '算数': 'filter-math',
@@ -218,71 +233,73 @@
                 activeBtn.classList.remove('opacity-80');
             }
 
-            initQuiz();
+            resetToStart();
         }
 
-        // Initialize / Reset Quiz
-        function initQuiz() {
+        // スタート画面に戻す
+        function resetToStart() {
+            clearInterval(timerInterval);
+            document.getElementById('start-screen').classList.remove('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+        }
+
+        // クイズ開始 ＆ タイマースタート
+        function startQuiz() {
             const db = window.quizDatabase || [];
             
-            // Filter pool
             let pool = db;
             if (currentSubject !== 'all') {
                 pool = db.filter(q => q.subject === currentSubject);
             }
 
-            // Shuffle and pick up to 10
-            const shuffled = [...pool].sort(() => 0.5 - Math.random());
-            activeQuestions = shuffled.slice(0, 10);
-
-            // Reset state
-            userAnswers = {};
-            currentIndex = 0;
-
-            // UI view toggle
-            document.getElementById('quiz-screen').classList.remove('hidden');
-            document.getElementById('result-screen').classList.add('hidden');
-
-            // Render status dots
-            renderStatusDots();
-
-            // Load first question
-            loadQuestion(currentIndex);
-        }
-
-        // Render progress status indicator dots
-        function renderStatusDots() {
-            const container = document.getElementById('status-dots');
-            container.innerHTML = '';
-            
-            for (let i = 0; i < activeQuestions.length; i++) {
-                const dot = document.createElement('div');
-                dot.id = `status-dot-${i}`;
-                dot.className = `w-3 h-3 rounded-full transition-all border ${
-                    i === currentIndex ? 'border-slate-800 scale-125' : 'border-slate-200'
-                } ${userAnswers[i] ? 'bg-teal-400' : 'bg-slate-200'}`;
-                container.appendChild(dot);
-            }
-        }
-
-        // Display current question details
-        function loadQuestion(index) {
-            if (activeQuestions.length === 0) {
-                document.getElementById('question-text').innerText = "該当する問題がありません。";
-                document.getElementById('choices-container').innerHTML = '';
+            if (pool.length === 0) {
+                alert("該当する科目の問題がありません。");
                 return;
             }
 
+            // ランダム10問抽出
+            const shuffled = [...pool].sort(() => 0.5 - Math.random());
+            activeQuestions = shuffled.slice(0, 10);
+
+            userAnswers = {};
+            currentIndex = 0;
+
+            // 画面切り替え
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+
+            // タイマー初期化 ＆ 開始
+            startTime = Date.now();
+            updateTimerDisplay();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+
+            loadQuestion(currentIndex);
+        }
+
+        // タイマー表示の更新関数
+        function updateTimerDisplay() {
+            const now = Date.now();
+            elapsedTimeInSeconds = Math.floor((now - startTime) / 1000);
+            
+            const minutes = Math.floor(elapsedTimeInSeconds / 60);
+            const seconds = elapsedTimeInSeconds % 60;
+
+            const timeStr = `${String(minutes).padStart(2, '0')}分${String(seconds).padStart(2, '0')}秒`;
+            document.getElementById('live-timer').innerText = timeStr;
+        }
+
+        // 問題の読み込み
+        function loadQuestion(index) {
             const q = activeQuestions[index];
 
-            // Progress Texts
             document.getElementById('progress-text').innerText = `だい ${index + 1} / ${activeQuestions.length} もん`;
             
-            // Progress Bar Width
             const progressPercent = ((index + 1) / activeQuestions.length) * 100;
             document.getElementById('progress-bar').style.width = `${progressPercent}%`;
 
-            // Subject Badge Style
             const badge = document.getElementById('subject-badge');
             badge.innerText = q.subject;
             badge.className = "px-3 py-1 rounded-full text-xs sm:text-sm font-bold text-white shadow-sm ";
@@ -294,10 +311,8 @@
                 default: badge.classList.add('bg-slate-500'); break;
             }
 
-            // Question Text
             document.getElementById('question-text').innerText = q.question;
 
-            // Choices Buttons
             const choicesContainer = document.getElementById('choices-container');
             choicesContainer.innerHTML = '';
 
@@ -324,29 +339,15 @@
                 choicesContainer.appendChild(btn);
             });
 
-            // Navigation Buttons State Update
             document.getElementById('prev-btn').disabled = (index === 0);
-
-            // Update status dots active indicator
-            for (let i = 0; i < activeQuestions.length; i++) {
-                const dot = document.getElementById(`status-dot-${i}`);
-                if (dot) {
-                    dot.className = `w-3 h-3 rounded-full transition-all border ${
-                        i === index ? 'border-slate-800 scale-125' : 'border-slate-200'
-                    } ${userAnswers[i] ? 'bg-teal-400' : 'bg-slate-200'}`;
-                }
-            }
-
             checkCompletion();
         }
 
-        // Handle user selecting an answer option
         function selectAnswer(questionIndex, choiceCode) {
             userAnswers[questionIndex] = choiceCode;
             loadQuestion(questionIndex);
         }
 
-        // Navigate to previous question
         function prevQuestion() {
             if (currentIndex > 0) {
                 currentIndex--;
@@ -354,7 +355,6 @@
             }
         }
 
-        // Navigate to next question
         function nextQuestion() {
             if (currentIndex < activeQuestions.length - 1) {
                 currentIndex++;
@@ -362,7 +362,6 @@
             }
         }
 
-        // Check if all questions are answered & show commit button
         function checkCompletion() {
             const totalCount = activeQuestions.length;
             const answeredCount = Object.keys(userAnswers).length;
@@ -372,7 +371,6 @@
             const warningText = document.getElementById('unanswered-warning');
 
             if (answeredCount === totalCount && totalCount > 0) {
-                // All answered
                 if (currentIndex === totalCount - 1) {
                     nextBtn.classList.add('hidden');
                     commitBtn.classList.remove('hidden');
@@ -390,8 +388,16 @@
             }
         }
 
-        // Score Quiz and Render Results Page
+        // 採点＆タイマー停止
         function scoreQuiz() {
+            // タイマーをストップ
+            clearInterval(timerInterval);
+
+            // 最終時間をフォーマット
+            const minutes = Math.floor(elapsedTimeInSeconds / 60);
+            const seconds = elapsedTimeInSeconds % 60;
+            const finalTimeFormatted = `${minutes}分${seconds}秒`;
+
             let correctCount = 0;
             const reviewList = document.getElementById('review-list');
             reviewList.innerHTML = '';
@@ -401,7 +407,6 @@
                 const isCorrect = (userChoice === q.answer);
                 if (isCorrect) correctCount++;
 
-                // Build detail item HTML
                 const item = document.createElement('div');
                 item.className = `p-4 sm:p-5 rounded-2xl border-2 ${
                     isCorrect ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'
@@ -441,24 +446,25 @@
                 reviewList.appendChild(item);
             });
 
-            // Score Summary text & messages
+            // 得点と経過時間の反映
             document.getElementById('score-text').innerText = correctCount;
+            document.getElementById('final-time-text').innerText = finalTimeFormatted;
 
             const emojiEl = document.getElementById('result-emoji');
             const commentEl = document.getElementById('score-comment');
 
             if (correctCount === activeQuestions.length) {
                 emojiEl.innerText = "💮";
-                commentEl.innerText = "パーフェクト！素晴らしい全問正解です！この調子でどんどん進めよう！";
+                commentEl.innerText = "パーフェクト！素晴らしいスピードと正確さです！";
             } else if (correctCount >= activeQuestions.length * 0.7) {
                 emojiEl.innerText = "🎉";
-                commentEl.innerText = "お見事！よく頑張りました！間違えた問題の解説もチェックして復習しよう！";
+                commentEl.innerText = "お見事！よく頑張りました！間違えた問題の解説もチェックしよう！";
             } else {
                 emojiEl.innerText = "🌱";
-                commentEl.innerText = "おつかれさま！間違えたところを「解説」で復習して、もう一度挑戦してみよう！";
+                commentEl.innerText = "おつかれさま！解説でしっかり復習して、もう一度挑戦してみよう！";
             }
 
-            // Switch Screen
+            // 画面切り替え
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
